@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Application.Services;
@@ -24,7 +23,7 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    public async Task<UsuarioResponseDTO> LoginAsync(UsuarioLoginDTO dto)
+    public async Task<UsuarioTokenResponseDTO> LoginAsync(UsuarioLoginDTO dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email)
             ?? throw new ApplicationException("Usuário não encontrado.");
@@ -38,17 +37,13 @@ public class AuthService : IAuthService
 
         var token = GenerateJwtToken(user, roles);
 
-        return new UsuarioResponseDTO
+        return new UsuarioTokenResponseDTO
         {
-            Email = user.Email!,
-            Id = user.Id,
-            Roles = roles,
-            Token = token,
-            Nome = user.UserName
+            Token = token
         };
     }
 
-    public async Task<UsuarioResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
+    public async Task<UsuarioCreateResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
     {
         var user = new IdentityUser<Guid>
         {
@@ -63,18 +58,15 @@ public class AuthService : IAuthService
 
         await EnsureRolesExist();
 
-        await _userManager.AddToRoleAsync(user, "Membro");
+        await _userManager.AddToRoleAsync(user, dto.Role);
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        var token = GenerateJwtToken(user, roles);
-
-        return new UsuarioResponseDTO
+        return new UsuarioCreateResponseDTO
         {
             Email = user.Email!,
             Id = user.Id,
-            Roles = roles,
-            Token = token,
+            Role = roles,
             Nome = user.UserName
         };
     }
