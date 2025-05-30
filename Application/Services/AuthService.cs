@@ -35,7 +35,7 @@ public class AuthService : IAuthService
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        var token = GenerateJwtToken(user, roles);
+        var token = await GenerateJwtToken(user);
 
         return new UsuarioTokenResponseDTO
         {
@@ -71,13 +71,15 @@ public class AuthService : IAuthService
         };
     }
 
-    private string GenerateJwtToken(IdentityUser<Guid> user, IList<string> roles)
+    private async Task<string> GenerateJwtToken(IdentityUser<Guid> user)
     {
+        var roles = await _userManager.GetRolesAsync(user);
+
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-            new Claim(ClaimTypes.Name, user.Email!)
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new (JwtRegisteredClaimNames.Email, user.Email!),
+            new (ClaimTypes.Name, user.Email!)
         };
 
         foreach (var role in roles)
@@ -85,14 +87,14 @@ public class AuthService : IAuthService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"], 
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(6),
+            expires: DateTime.Now.AddHours(4),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
