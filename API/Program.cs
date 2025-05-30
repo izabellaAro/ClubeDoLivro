@@ -23,6 +23,7 @@ builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 
