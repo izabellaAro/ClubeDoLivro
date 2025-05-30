@@ -17,6 +17,25 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _userService.GetUserByIdAsync(id);
+        if (!result.Succeeded)
+            return BadRequest(new { result.Error });
+
+        return Ok(result.Data);
+    }
+
+    [Authorize]
+    [HttpGet("getAll")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _userService.GetAllUsersAsync();
+        return Ok(result);
+    }
+
     [Authorize(Roles = "Admin")]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateUser([FromBody] UsuarioUpdateDTO dto)
@@ -41,5 +60,16 @@ public class UserController : ControllerBase
             return BadRequest(new { result.Error });
 
         return Ok(new { Message = "Perfil atualizado com sucesso." });
+    }
+
+    [Authorize]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _userService.DeleteUserAsync(id);
+        if (!result.Succeeded)
+            return BadRequest(new { result.Error });
+
+        return Ok(new { Message = result.Data });
     }
 }

@@ -43,7 +43,7 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<UsuarioCreateResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
+    public async Task<UsuarioResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
     {
         var user = new IdentityUser<Guid>
         {
@@ -62,7 +62,7 @@ public class AuthService : IAuthService
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        return new UsuarioCreateResponseDTO
+        return new UsuarioResponseDTO
         {
             Email = user.Email!,
             Id = user.Id,

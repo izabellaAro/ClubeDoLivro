@@ -16,11 +16,11 @@ public class UserService : IUserService
         _roleManager = roleManager;
     }
 
-    public async Task<OperationResult> UpdateUserAsync(UsuarioUpdateDTO dto)
+    public async Task<OperationResult<string>> UpdateUserAsync(UsuarioUpdateDTO dto)
     {
         var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
         if (user == null)
-            return OperationResult.Failure("Usuário não encontrado.");
+            return OperationResult<string>.Failure("Usuário não encontrado.");
 
         var result = await UpdateCommonUserData(user, dto.Email, dto.Nome, dto.Senha);
         if (!result.Succeeded)
@@ -33,23 +33,23 @@ public class UserService : IUserService
                 return result;
         }
 
-        return OperationResult.Success();
+        return OperationResult<string>.Success("Usuário atualizado com sucesso.");
     }
 
-    public async Task<OperationResult> UpdateProfileAsync(Guid userId, UsuarioUpdateProfileDTO dto)
+    public async Task<OperationResult<string>> UpdateProfileAsync(Guid userId, UsuarioUpdateProfileDTO dto)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
-            return OperationResult.Failure("Usuário não encontrado.");
+            return OperationResult<string>.Failure("Usuário não encontrado.");
 
         var result = await UpdateCommonUserData(user, dto.Email, dto.Nome, dto.Senha);
         if (!result.Succeeded)
             return result;
 
-        return OperationResult.Success();
+        return OperationResult<string>.Success("Usuário atualizado com sucesso.");
     }
 
-    private async Task<OperationResult> UpdateCommonUserData(IdentityUser<Guid> user, string? email, string? nome, string? senha)
+    private async Task<OperationResult<string>> UpdateCommonUserData(IdentityUser<Guid> user, string? email, string? nome, string? senha)
     {
         if (!string.IsNullOrEmpty(email) && email != user.Email)
         {
@@ -73,13 +73,13 @@ public class UserService : IUserService
                 return ErrorFromIdentityResult(senhaResult);
         }
 
-        return OperationResult.Success();
+        return OperationResult<string>.Success(string.Empty);
     }
 
-    private async Task<OperationResult> UpdateUserRole(IdentityUser<Guid> user, string role)
+    private async Task<OperationResult<string>> UpdateUserRole(IdentityUser<Guid> user, string role)
     {
         if (!await _roleManager.RoleExistsAsync(role))
-            return OperationResult.Failure($"Role '{role}' não existe.");
+            return OperationResult<string>.Failure($"Role '{role}' não existe.");
 
         var currentRoles = await _userManager.GetRolesAsync(user);
         var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
@@ -90,12 +90,65 @@ public class UserService : IUserService
         if (!addRoleResult.Succeeded)
             return ErrorFromIdentityResult(addRoleResult);
 
-        return OperationResult.Success();
+        return OperationResult<string>.Success(string.Empty);
     }
 
-    private OperationResult ErrorFromIdentityResult(IdentityResult result)
+    private OperationResult<string> ErrorFromIdentityResult(IdentityResult result)
     {
         var error = string.Join(", ", result.Errors.Select(e => e.Description));
-        return OperationResult.Failure(error);
+        return OperationResult<string>.Failure(error);
+    }
+
+    public async Task<OperationResult<UsuarioResponseDTO>> GetUserByIdAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+            return OperationResult<UsuarioResponseDTO>.Failure("Usuário não encontrado.");
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var dto = new UsuarioResponseDTO
+        {
+            Id = user.Id,
+            Nome = user.UserName,
+            Email = user.Email,
+            Role = roles
+        };
+
+        return OperationResult<UsuarioResponseDTO>.Success(dto);
+    }
+
+    public async Task<List<UsuarioResponseDTO>> GetAllUsersAsync()
+    {
+        var users = _userManager.Users.ToList();
+        var result = new List<UsuarioResponseDTO>();
+
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+
+            result.Add(new UsuarioResponseDTO
+            {
+                Id = user.Id,
+                Nome = user.UserName,
+                Email = user.Email,
+                Role = roles
+            });
+        }
+
+        return result;
+    }
+
+    public async Task<OperationResult<string>> DeleteUserAsync(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+            return OperationResult<string>.Failure("Usuário não encontrado.");
+
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+            return OperationResult<string>.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+        return OperationResult<string>.Success("Usuário excluído com sucesso.");
     }
 }
