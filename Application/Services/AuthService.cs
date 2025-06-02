@@ -1,5 +1,9 @@
-﻿using Application.DTOs.Usuario;
+﻿using Application.DTOs.Result;
+using Application.DTOs.Usuario;
 using Application.Interfaces;
+using Domain.Entities;
+using Infrastructure.Interfaces;
+using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -14,13 +18,15 @@ public class AuthService : IAuthService
     private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly IConfiguration _configuration;
+    private readonly IUserProfileRepository _userProfileRepository;
 
     public AuthService(UserManager<IdentityUser<Guid>> userManager, RoleManager<IdentityRole<Guid>> roleManager,
-        IConfiguration configuration)
+        IConfiguration configuration, IUserProfileRepository userProfileRepository)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
+        _userProfileRepository = userProfileRepository;
     }
 
     public async Task<UsuarioTokenResponseDTO> LoginAsync(UsuarioLoginDTO dto)
@@ -43,7 +49,7 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<UsuarioResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
+    public async Task<OperationResult<string>> RegisterAsync(UsuarioRegisterDTO dto)
     {
         var user = new IdentityUser<Guid>
         {
@@ -60,15 +66,18 @@ public class AuthService : IAuthService
 
         await _userManager.AddToRoleAsync(user, dto.Role);
 
-        var roles = await _userManager.GetRolesAsync(user);
-
-        return new UsuarioResponseDTO
+        var profile = new UserProfile
         {
-            Email = user.Email!,
-            Id = user.Id,
-            Role = roles,
-            Nome = user.UserName
+            UserId = user.Id,
+            UserName = user.UserName,
+            Bio = null,
+            FavoriteGenero = null,
+            ProfilePicture = null
         };
+
+        await _userProfileRepository.AddAsync(profile);
+
+        return OperationResult<string>.Success("Usuário e perfil criados com sucesso.");
     }
 
     private async Task<string> GenerateJwtToken(IdentityUser<Guid> user)
