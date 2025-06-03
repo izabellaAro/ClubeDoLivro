@@ -2,6 +2,7 @@
 using Application.DTOs.User;
 using Application.Interfaces;
 using Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services;
@@ -10,11 +11,14 @@ public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly IAWSS3Service _awsS3Service;
 
-    public UserProfileService(IUserProfileRepository userProfileRepository, UserManager<IdentityUser<Guid>> userManager)
+    public UserProfileService(IUserProfileRepository userProfileRepository, UserManager<IdentityUser<Guid>> userManager,
+        IAWSS3Service awsS3Service)
     {
         _userProfileRepository = userProfileRepository;
         _userManager = userManager;
+        _awsS3Service = awsS3Service;
     }
 
     public async Task<OperationResult<UserProfileResponseDTO>> GetProfileAsync(Guid userId)
@@ -50,8 +54,8 @@ public class UserProfileService : IUserProfileService
         if (!string.IsNullOrEmpty(dto.FavoriteGenero))
             profile.FavoriteGenero = dto.FavoriteGenero;
 
-        if (!string.IsNullOrEmpty(dto.ProfilePicture))
-            profile.ProfilePicture = dto.ProfilePicture;
+        if (dto.Image != null)
+            await UpdatePictureProfileAsync(userId, dto.Image);
 
         await _userProfileRepository.UpdateAsync(profile);
 
@@ -81,5 +85,20 @@ public class UserProfileService : IUserProfileService
         await _userProfileRepository.DeleteAsync(user);
    
         return OperationResult<string>.Success("Perfil excluído com sucesso.");
+    }
+
+    private async Task<OperationResult<string>> UpdatePictureProfileAsync(Guid userId, IFormFile image)
+    {
+        var profile = await _userProfileRepository.ConsultProfile(userId);
+        if (profile is null)
+            return OperationResult<string>.Failure("Perfil não encontrado.");
+
+        var key = "medias/" + Guid.NewGuid();
+        var result = await _awsS3Service.UploadImage("clube-livro", key, image);
+
+        profile.AddImageKey(key);
+        await _userProfileRepository.UpdateAsync(profile);
+
+        return OperationResult<string>.Success("Perfil atualizado com sucesso.");
     }
 }

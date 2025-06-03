@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Application.Services;
+using Application.Settings;
 using Infrastructure.Data;
 using Infrastructure.Interfaces;
 using Infrastructure.Repositories;
@@ -24,6 +25,8 @@ builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>(options =>
 .AddEntityFrameworkStores<DataContext>()
 .AddDefaultTokenProviders();
 
+builder.Services.Configure<AWSSettings>(builder.Configuration.GetSection(nameof(AWSSettings)));
+
 //repositories
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
@@ -31,6 +34,7 @@ builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IAWSS3Service, AWSS3Service>();
 
 builder.Services.AddControllers();
 

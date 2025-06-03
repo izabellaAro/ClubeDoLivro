@@ -31,7 +31,7 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpPut("me")]
-    public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfileRegisterDTO dto)
+    public async Task<IActionResult> UpdateMyProfile([FromForm] UserProfileRegisterDTO dto)
     {
         var userId = GetUserId();
         var result = await _profileService.UpdateProfileAsync(userId, dto);

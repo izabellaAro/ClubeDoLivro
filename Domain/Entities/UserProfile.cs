@@ -12,4 +12,9 @@ public class UserProfile
     public string? ProfilePicture { get; set; }
 
     public IdentityUser<Guid> User { get; set; } = null!;
+
+    public void AddImageKey(string key)
+    {
+        ProfilePicture = key;
+    }
 }
