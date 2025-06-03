@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Usuario;
+﻿using Application.DTOs.User;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +38,7 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateUser([FromBody] UsuarioUpdateDTO dto)
+    public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO dto)
     {
         var result = await _userService.UpdateUserAsync(dto);
 
@@ -50,7 +50,7 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpPut("me")]
-    public async Task<IActionResult> UpdateMyProfile([FromBody] UsuarioUpdateProfileDTO dto)
+    public async Task<IActionResult> UpdateMyProfile([FromBody] UserUpdateCredentialsDTO dto)
     {
         var userId = User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
 

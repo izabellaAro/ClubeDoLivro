@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Result;
-using Application.DTOs.Usuario;
+using Application.DTOs.User;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,7 +16,7 @@ public class UserService : IUserService
         _roleManager = roleManager;
     }
 
-    public async Task<OperationResult<string>> UpdateUserAsync(UsuarioUpdateDTO dto)
+    public async Task<OperationResult<string>> UpdateUserAsync(UserUpdateDTO dto)
     {
         var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
         if (user == null)
@@ -36,7 +36,7 @@ public class UserService : IUserService
         return OperationResult<string>.Success("Usuário atualizado com sucesso.");
     }
 
-    public async Task<OperationResult<string>> UpdateProfileAsync(Guid userId, UsuarioUpdateProfileDTO dto)
+    public async Task<OperationResult<string>> UpdateProfileAsync(Guid userId, UserUpdateCredentialsDTO dto)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
@@ -99,15 +99,15 @@ public class UserService : IUserService
         return OperationResult<string>.Failure(error);
     }
 
-    public async Task<OperationResult<UsuarioResponseDTO>> GetUserByIdAsync(Guid userId)
+    public async Task<OperationResult<UserResponseDTO>> GetUserByIdAsync(Guid userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
-            return OperationResult<UsuarioResponseDTO>.Failure("Usuário não encontrado.");
+            return OperationResult<UserResponseDTO>.Failure("Usuário não encontrado.");
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        var dto = new UsuarioResponseDTO
+        var dto = new UserResponseDTO
         {
             Id = user.Id,
             Nome = user.UserName,
@@ -115,19 +115,19 @@ public class UserService : IUserService
             Role = roles
         };
 
-        return OperationResult<UsuarioResponseDTO>.Success(dto);
+        return OperationResult<UserResponseDTO>.Success(dto);
     }
 
-    public async Task<List<UsuarioResponseDTO>> GetAllUsersAsync()
+    public async Task<List<UserResponseDTO>> GetAllUsersAsync()
     {
         var users = _userManager.Users.ToList();
-        var result = new List<UsuarioResponseDTO>();
+        var result = new List<UserResponseDTO>();
 
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
 
-            result.Add(new UsuarioResponseDTO
+            result.Add(new UserResponseDTO
             {
                 Id = user.Id,
                 Nome = user.UserName,

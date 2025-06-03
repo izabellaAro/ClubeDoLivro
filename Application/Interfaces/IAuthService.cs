@@ -1,10 +1,10 @@
 ﻿using Application.DTOs.Result;
-using Application.DTOs.Usuario;
+using Application.DTOs.User;
 
 namespace Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<OperationResult<string>> RegisterAsync(UsuarioRegisterDTO dto);
-    Task<UsuarioTokenResponseDTO> LoginAsync(UsuarioLoginDTO dto);
+    Task<OperationResult<string>> RegisterAsync(UserRegisterDTO dto);
+    Task<UserTokenResponseDTO> LoginAsync(UserLoginDTO dto);
 }

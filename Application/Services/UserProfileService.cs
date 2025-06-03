@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Result;
-using Application.DTOs.Usuario;
+using Application.DTOs.User;
 using Application.Interfaces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -17,24 +17,25 @@ public class UserProfileService : IUserProfileService
         _userManager = userManager;
     }
 
-    public async Task<OperationResult<UserProfileDTO>> GetProfileAsync(Guid userId)
+    public async Task<OperationResult<UserProfileResponseDTO>> GetProfileAsync(Guid userId)
     {
         var profile = await _userProfileRepository.ConsultProfile(userId);
         if (profile == null)
-            return OperationResult<UserProfileDTO>.Failure("Perfil não encontrado.");
+            return OperationResult<UserProfileResponseDTO>.Failure("Perfil não encontrado.");
 
-        var dto = new UserProfileDTO
+        var dto = new UserProfileResponseDTO
         {
+            Id = profile.Id,
             Nome = profile.UserName,
             Bio = profile.Bio,
             FavoriteGenero = profile.FavoriteGenero,
             ProfilePicture = profile.ProfilePicture
         };
             
-        return OperationResult<UserProfileDTO>.Success(dto);
+        return OperationResult<UserProfileResponseDTO>.Success(dto);
     }
 
-    public async Task<OperationResult<string>> UpdateProfileAsync(Guid userId, UserProfileDTO dto)
+    public async Task<OperationResult<string>> UpdateProfileAsync(Guid userId, UserProfileRegisterDTO dto)
     {
         var profile = await _userProfileRepository.ConsultProfile(userId);
         if (profile == null)
@@ -57,11 +58,11 @@ public class UserProfileService : IUserProfileService
         return OperationResult<string>.Success("Perfil atualizado com sucesso.");
     }
 
-    public async Task<IEnumerable<UserProfileDTO>> GetAllAsync(int skip = 0, int take = 20)
+    public async Task<IEnumerable<UserProfileResponseDTO>> GetAllAsync(int skip = 0, int take = 20)
     {
         var allProfiles = await _userProfileRepository.ConsultAllProfiles(skip, take);
         
-        return allProfiles.Select(profile => new UserProfileDTO
+        return allProfiles.Select(profile => new UserProfileResponseDTO
         {
             Id = profile.Id,
             Nome = profile.UserName,

@@ -1,6 +1,6 @@
-﻿namespace Application.DTOs.Usuario;
+﻿namespace Application.DTOs.User;
 
-public class UsuarioRegisterDTO
+public class UserRegisterDTO
 {
     public string Nome { get; set; }
     public string Email { get; set; }

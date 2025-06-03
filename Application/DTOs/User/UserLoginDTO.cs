@@ -1,6 +1,6 @@
-﻿namespace Application.DTOs.Usuario;
+﻿namespace Application.DTOs.User;
 
-public class UsuarioLoginDTO
+public class UserLoginDTO
 {
     public string Email { get; set; }
     public string Senha { get; set; }

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Usuario;
+﻿using Application.DTOs.User;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +31,7 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpPut("me")]
-    public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfileDTO dto)
+    public async Task<IActionResult> UpdateMyProfile([FromBody] UserProfileRegisterDTO dto)
     {
         var userId = GetUserId();
         var result = await _profileService.UpdateProfileAsync(userId, dto);

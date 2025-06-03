@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Result;
-using Application.DTOs.Usuario;
+using Application.DTOs.User;
 using Application.Interfaces;
 using Domain.Entities;
 using Infrastructure.Interfaces;
@@ -29,7 +29,7 @@ public class AuthService : IAuthService
         _userProfileRepository = userProfileRepository;
     }
 
-    public async Task<UsuarioTokenResponseDTO> LoginAsync(UsuarioLoginDTO dto)
+    public async Task<UserTokenResponseDTO> LoginAsync(UserLoginDTO dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email)
             ?? throw new ApplicationException("Usuário não encontrado.");
@@ -43,13 +43,13 @@ public class AuthService : IAuthService
 
         var token = await GenerateJwtToken(user);
 
-        return new UsuarioTokenResponseDTO
+        return new UserTokenResponseDTO
         {
             Token = token
         };
     }
 
-    public async Task<OperationResult<string>> RegisterAsync(UsuarioRegisterDTO dto)
+    public async Task<OperationResult<string>> RegisterAsync(UserRegisterDTO dto)
     {
         var user = new IdentityUser<Guid>
         {

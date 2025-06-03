@@ -1,6 +1,6 @@
-﻿namespace Application.DTOs.Usuario;
+﻿namespace Application.DTOs.User;
 
-public class UserProfileDTO
+public class UserProfileResponseDTO
 {
     public string Id { get; set; }
     public string? Nome { get; set; }
