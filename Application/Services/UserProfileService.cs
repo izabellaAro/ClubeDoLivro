@@ -3,21 +3,17 @@ using Application.DTOs.User;
 using Application.Interfaces;
 using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services;
 
 public class UserProfileService : IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly IAWSS3Service _awsS3Service;
 
-    public UserProfileService(IUserProfileRepository userProfileRepository, UserManager<IdentityUser<Guid>> userManager,
-        IAWSS3Service awsS3Service)
+    public UserProfileService(IUserProfileRepository userProfileRepository, IAWSS3Service awsS3Service)
     {
         _userProfileRepository = userProfileRepository;
-        _userManager = userManager;
         _awsS3Service = awsS3Service;
     }
 
