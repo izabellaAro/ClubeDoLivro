@@ -11,6 +11,7 @@ public class DataContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Gu
     public DataContext(DbContextOptions<DataContext> opts) : base(opts) { }
 
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Book> Books { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
