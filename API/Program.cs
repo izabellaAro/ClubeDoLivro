@@ -32,6 +32,7 @@ builder.Services.Configure<AWSSettings>(builder.Configuration.GetSection(nameof(
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IBookShelfRepository, BookShelfRepository>();
+builder.Services.AddScoped<IReadingScheduleRepository, ReadingScheduleRepository>();
 
 //services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -40,6 +41,7 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IAWSS3Service, AWSS3Service>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IBookShelfService, BookShelfService>();
+builder.Services.AddScoped<IReadingScheduleService, ReadingScheduleService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

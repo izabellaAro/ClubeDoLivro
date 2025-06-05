@@ -13,6 +13,7 @@ public class DataContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Gu
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Book> Books { get; set; }
     public DbSet<BookShelf> BooksShelf { get; set; }
+    public DbSet<ReadingSchedule> ReadingSchedules { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
