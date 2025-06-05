@@ -2,7 +2,6 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace API.Controllers;
 
@@ -21,8 +20,7 @@ public class BookController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> RegisterBook([FromForm] BookRegisterDTO dto)
     {
-        var userId = GetUserId();
-        var result = await _bookService.CreateBookAsync(userId, dto);
+        var result = await _bookService.CreateBookAsync(dto);
 
         if (!result.Succeeded)
             return BadRequest(new { error = result.Error });
@@ -31,17 +29,15 @@ public class BookController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetBooksFromUser()
+    public async Task<IActionResult> GetBooks([FromQuery] int skip = 0, [FromQuery] int take = 10)
     {
-        var userId = GetUserId();
-        return Ok(await _bookService.GetAllBooksAsync(userId));
+        return Ok(await _bookService.GetAllBooksAsync(skip, take));
     }
 
     [HttpPut("{bookId}")]
     public async Task<IActionResult> UpdateBook(string bookId, [FromForm] BookUpdateDTO dto)
     {
-        var userId = GetUserId();
-        var result = await _bookService.UpdateBookAsync(userId, bookId, dto);
+        var result = await _bookService.UpdateBookAsync(bookId, dto);
         
         if (!result.Succeeded)
             return BadRequest(new { result.Error });
@@ -51,17 +47,10 @@ public class BookController : ControllerBase
     [HttpDelete("{bookId}")]
     public async Task<IActionResult> DeleteBook(string bookId)
     {
-        var userId = GetUserId();
-        var result = await _bookService.DeleteBookAsync(userId, bookId);
+        var result = await _bookService.DeleteBookAsync(bookId);
         
         if (!result.Succeeded)
             return BadRequest(new { result.Error });
         return Ok(new { Message = result.Data });
-    }
-
-    private Guid GetUserId()
-    {
-        var userId = User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        return Guid.Parse(userId);
     }
 }

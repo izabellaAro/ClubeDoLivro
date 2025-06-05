@@ -17,21 +17,15 @@ public class BookService : IBookService
         _awsS3Service = awsS3Service;
     }
 
-    public async Task<OperationResult<string>> CreateBookAsync(Guid userId, BookRegisterDTO dto)
+    public async Task<OperationResult<string>> CreateBookAsync(BookRegisterDTO dto)
     {
         try
         {
-            if (dto.Status == StatusLeitura.Lido && (dto.Nota is < 1 or > 5))
-                return OperationResult<string>.Failure("Nota deve ser entre 1 e 5 para livros lidos.");
-
             var book = new Book
             {
-                UsuarioId = userId,
                 Nome = dto.Nome,
                 Autor = dto.Autor,
-                Sinopse = dto.Sinopse,
-                Status = dto.Status,
-                Nota = dto.Nota
+                Sinopse = dto.Sinopse
             };
 
             if (dto.Capa != null)
@@ -51,9 +45,9 @@ public class BookService : IBookService
         }
     }
 
-    public async Task<IEnumerable<BookResponseDTO>> GetAllBooksAsync(Guid userId)
+    public async Task<IEnumerable<BookResponseDTO>> GetAllBooksAsync(int skip = 0, int take = 10)
     {
-        var books = await _bookRepository.GetAllBooksFromUser(userId);
+        var books = await _bookRepository.GetAllBooks(skip, take);
 
         return books.Select(l => new BookResponseDTO
         {
@@ -61,15 +55,13 @@ public class BookService : IBookService
             Nome = l.Nome,
             Autor = l.Autor,
             Sinopse = l.Sinopse,
-            Status = l.Status,
-            CapaUrl = l.CapaUrl,
-            Nota = l.Nota
+            CapaUrl = l.CapaUrl
         }).ToList();
     }
 
-    public async Task<OperationResult<string>> UpdateBookAsync(Guid userId, string bookId, BookUpdateDTO dto)
+    public async Task<OperationResult<string>> UpdateBookAsync(string bookId, BookUpdateDTO dto)
     {
-        var book = await _bookRepository.ConsultBook(bookId, userId);
+        var book = await _bookRepository.ConsultBookById(bookId);
 
         if (book == null)
             return OperationResult<string>.Failure("Livro não encontrado.");
@@ -83,23 +75,6 @@ public class BookService : IBookService
         if (!string.IsNullOrEmpty(dto.Sinopse))
             book.Sinopse = dto.Sinopse;
 
-        if (dto.Status.HasValue)
-        {
-            book.Status = dto.Status.Value;
-            book.Nota = book.Status == StatusLeitura.Lido ? book.Nota : null;
-        }
-
-        if (dto.Nota.HasValue)
-        {
-            if (dto.Nota is < 1 or > 5)
-                return OperationResult<string>.Failure("Nota deve ser entre 1 e 5.");
-
-            if (book.Status == StatusLeitura.Lido)
-                book.Nota = dto.Nota;
-            else
-                return OperationResult<string>.Failure("Só é possível atribuir nota se o livro estiver como 'Lido'.");
-        }
-
         if (dto.CapaUrl != null)
         {
             var key = "medias/" + Guid.NewGuid();
@@ -112,9 +87,9 @@ public class BookService : IBookService
         return OperationResult<string>.Success("Livro atualizado com sucesso.");
     }
 
-    public async Task<OperationResult<string>> DeleteBookAsync(Guid userId, string bookId)
+    public async Task<OperationResult<string>> DeleteBookAsync(string bookId)
     {
-        var book = await _bookRepository.ConsultBook(bookId, userId);
+        var book = await _bookRepository.ConsultBookById(bookId);
 
         if (book == null)
             return OperationResult<string>.Failure("Livro não encontrado.");

@@ -4,6 +4,6 @@ namespace Infrastructure.Interfaces;
 
 public interface IBookRepository : IBaseRepository<Book>
 {
-    Task<IEnumerable<Book>> GetAllBooksFromUser(Guid userId);
-    Task<Book> ConsultBook(string bookId, Guid userId);
+    Task<IEnumerable<Book>> GetAllBooks(int skip, int take);
+    Task<Book> ConsultBookById(string bookId);
 }

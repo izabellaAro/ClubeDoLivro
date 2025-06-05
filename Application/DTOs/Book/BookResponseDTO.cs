@@ -1,6 +1,4 @@
-﻿using Domain.Entities;
-
-namespace Application.DTOs.Book;
+﻿namespace Application.DTOs.Book;
 
 public class BookResponseDTO
 {
@@ -9,6 +7,4 @@ public class BookResponseDTO
     public string Autor { get; set; } = null!;
     public string Sinopse { get; set; } = null!;
     public string? CapaUrl { get; set; }
-    public StatusLeitura Status { get; set; }
-    public float? Nota { get; set; }
 }
