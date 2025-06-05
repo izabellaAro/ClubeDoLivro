@@ -51,6 +51,21 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Books",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Autor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Sinopse = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CapaUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Books", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -156,6 +171,55 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "UserProfiles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FavoriteGenero = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProfilePicture = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserProfiles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BooksShelf",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LivroId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UsuarioId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Nota = table.Column<float>(type: "real", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BooksShelf", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BooksShelf_AspNetUsers_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BooksShelf_Books_LivroId",
+                        column: x => x.LivroId,
+                        principalTable: "Books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -194,6 +258,23 @@ namespace Infrastructure.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BooksShelf_LivroId",
+                table: "BooksShelf",
+                column: "LivroId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BooksShelf_UsuarioId_LivroId",
+                table: "BooksShelf",
+                columns: new[] { "UsuarioId", "LivroId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserProfiles_UserId",
+                table: "UserProfiles",
+                column: "UserId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -215,7 +296,16 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BooksShelf");
+
+            migrationBuilder.DropTable(
+                name: "UserProfiles");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Books");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

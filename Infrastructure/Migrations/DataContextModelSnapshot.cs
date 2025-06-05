@@ -38,12 +38,26 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float?>("Nota")
-                        .HasColumnType("real");
-
                     b.Property<string>("Sinopse")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Books");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BookShelf", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LivroId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float?>("Nota")
+                        .HasColumnType("real");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -53,9 +67,12 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("LivroId");
 
-                    b.ToTable("Books");
+                    b.HasIndex("UsuarioId", "LivroId")
+                        .IsUnique();
+
+                    b.ToTable("BooksShelf");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserProfile", b =>
@@ -283,13 +300,21 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.Book", b =>
+            modelBuilder.Entity("Domain.Entities.BookShelf", b =>
                 {
+                    b.HasOne("Domain.Entities.Book", "Livro")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("LivroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<System.Guid>", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Livro");
 
                     b.Navigation("Usuario");
                 });
@@ -354,6 +379,11 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Book", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 #pragma warning restore 612, 618
         }
